@@ -1,0 +1,12 @@
+{
+    "terraform.languageServer": {
+      "external": true,
+      "args": [
+        "serve"
+      ]
+    },
+    "[terraform]": {
+      "editor.defaultFormatter": "hashicorp.terraform",
+      "editor.formatOnSave": true
+  }
+  }

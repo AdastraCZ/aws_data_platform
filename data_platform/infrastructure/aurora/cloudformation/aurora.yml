@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  DBUsername:
+    NoEcho: 'false'
+    Description: Username for PostgreSQL database access
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: 'false'
+    Description: Password for PostgreSQL database access
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+
+
+Resources:
+
+  MonitoringIAMRole: 
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "monitoring.rds.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
+
+  # role for integrating Aurora with S3
+  AuroraIntegrationRole: 
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "rds.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+
+  AuroraIntegrationPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Roles:
+        - !Ref AuroraIntegrationRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "s3:*"
+            Resource: "*"
+
+  AuroraDBSubnetGroup: 
+    Properties: 
+      DBSubnetGroupDescription: description
+      SubnetIds: 
+          - !ImportValue PrivateSubnet1
+          - !ImportValue PrivateSubnet2
+      Tags: 
+        - 
+          Key: String
+          Value: String
+    Type: "AWS::RDS::DBSubnetGroup"
+
+
+  RDSCluster:
+    Type: 'AWS::RDS::DBCluster'
+    Properties:
+      AssociatedRoles:
+        - FeatureName: s3Import
+          RoleArn: !GetAtt AuroraIntegrationRole.Arn
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      DBClusterIdentifier: aurora-postgresql-cluster
+      Engine: aurora-postgresql
+      EngineVersion: '13.3'
+      #DBClusterParameterGroupName: default.aurora-postgresql10
+      EnableCloudwatchLogsExports:
+        - postgresql
+      VpcSecurityGroupIds: 
+          - !ImportValue AuroraSecurityGroupId
+  
+  RDSDBInstance1:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBInstanceIdentifier: aurora-postgresql-instance1
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      Engine: aurora-postgresql
+      DBClusterIdentifier: !Ref RDSCluster
+      PubliclyAccessible: 'false'
+      DBInstanceClass: db.t4g.medium
+      #MonitoringRoleArn: !GetAtt MonitoringIAMRole.Arn
+
+  RDSDBInstance2:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBInstanceIdentifier: aurora-postgresql-instance2
+      DBSubnetGroupName: !Ref AuroraDBSubnetGroup
+      Engine: aurora-postgresql
+      DBClusterIdentifier: !Ref RDSCluster
+      PubliclyAccessible: 'false'
+      DBInstanceClass: db.t4g.medium
+      #MonitoringRoleArn: !GetAtt MonitoringIAMRole.Arn
