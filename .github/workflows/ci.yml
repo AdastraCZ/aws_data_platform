@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./data_platform/infrastructure/env/terraform
+        working-directory: ./data_platform/infrastructure/env/terraform/initial_setup/
     steps:
       - name: Checkout
         uses: actions/checkout@v2
