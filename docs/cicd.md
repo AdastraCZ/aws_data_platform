@@ -50,6 +50,6 @@ All the Data Platform code is stored in `data_platform` directory.
 | [Data Lake crawlers](../data_platform/data_lake/crawlers/terraform/) | Glue crawlers Terraform definitions. Any changes in Terraform are automatically deployed. |
 | [Data Lake job scripts](../data_platform/data_lake/glue_jobs/scripts/) | Glue jobs scripts. Spark engine python code. |
 | [Data Lake job definitions](../data_platform/data_lake/glue_jobs/terraform/) | Glue jobs Terraform definitions. Any changes in Terraform are automatically deployed. |
-| [Data Lake infrastructure code](../data_platform/data_lake/infrastructure/) | Infrastrucutre code - some parts are CloudFormation, the rest is Terraform. Terraform code gets deployed automatically. CloudFormation scripts have to be created manually in AWS CloudFormation stacks. |
+| [Data Lake infrastructure code](../data_platform/infrastructure/) | Infrastrucutre code - some parts are CloudFormation, the rest is Terraform. Terraform code gets deployed automatically. CloudFormation scripts have to be created manually in AWS CloudFormation stacks. |
 | [docs](../docs/) | |
 
