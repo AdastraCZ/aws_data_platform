@@ -135,7 +135,7 @@ def get_dataset(dataset, execution_date, **kwargs):
         # get World Bank data for the last 20 years
         years_to_process = YEARS_TO_DOWNLOAD
     for x in range(years_to_process):
-        year = (execution_date - relativedelta(years=x+1)).strftime("%Y")
+        year = (execution_date - relativedelta(years=x)).strftime("%Y")
         logging.info('###  processing data : ' + dataset + ', year:' + year)
         process_file(request_data_json(dataset, year), dataset, year)
 
